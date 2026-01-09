@@ -4436,8 +4436,7 @@ df[df['cve.id'].isin(selected)].to_csv(os.path.join(data_path, f'{nickname}.csv'
 
 Tracking of the selected CVEs was performed using a Python program, which collected relevant data, generated visualizations, and saved the resulting graph as an image file. Both the Python code and the graph image are provided in the EPSS_Tracker folder for reference.
 
-![title](EPSS_tracker\epss_plot.png)
-
+![png](epss_plot.png)
 
 ```python
 
