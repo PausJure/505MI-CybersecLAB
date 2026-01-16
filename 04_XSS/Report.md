@@ -30,7 +30,7 @@ Once the updated configuration was applied, safety mode was successfully disable
 
 ![Photo of Reflected XSS challenge](images/Rxss.png)
 
-Initially, the same initial approach was attempted by injecting the alert payload (<iframe src="javascript:alert(\xss`)">) into the query parameter following q=`. However, this did not successfully complete the challenge, indicating that the vulnerability differed from the previous DOM-based XSS scenario.
+Initially, the same initial approach was attempted by injecting the alert payload ```js <iframe src="javascript:alert(\xss`)">)``` into the query parameter following q=`. However, this did not successfully complete the challenge, indicating that the vulnerability differed from the previous DOM-based XSS scenario.
 
 Subsequently, various potential attack vectors were explored. The language selection functionality was tested but proved ineffective, as it relies on a controlled drop-down menu rather than free-form user input. Additional attempts were made by entering the payload into address input fields; however, these inputs did not result in script execution.
 
@@ -41,7 +41,7 @@ Further investigation involved attempting to modify product names to include the
 
  Following these unsuccessful attempts, items were added to the shopping cart and the checkout process was initiated, as this stage contained multiple user-input fields that could potentially be vulnerable. However, testing these fields did not result in script execution.
 
-Upon completion of the transaction, a confirmation page was displayed with a link to a tracking page. This page closely resembled the interface encountered in the earlier DOM-based XSS challenge, as it included a user-controllable parameter within the URL (id=). Recognising this as a potential injection point, the payload <iframe src="javascript:alert(\xss`)"> was appended to the id parameter.
+Upon completion of the transaction, a confirmation page was displayed with a link to a tracking page. This page closely resembled the interface encountered in the earlier DOM-based XSS challenge, as it included a user-controllable parameter within the URL (id=). Recognising this as a potential injection point, the payload ```js <iframe src="javascript:alert(\xss`)">``` was appended to the id parameter.
 
 This modification successfully triggered a JavaScript alert, confirming the presence of a reflected Cross-Site Scripting vulnerability, completing the challenge.
 
@@ -87,6 +87,7 @@ The primary distinction between these two cases lies in the origin of the payloa
 - Course slides (04_XSS.pdf)
 - https://angular.dev/api/platform-browser/DomSanitizer
 - https://angular.dev/
+
 
 
 
