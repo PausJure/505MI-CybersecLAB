@@ -8,13 +8,13 @@ In this lab session, we were required to complete and discuss the differences be
 To perform the first attack, the required steps were relatively straightforward. The objective was to identify a method of manipulating the Document Object Model (DOM) in order to successfully complete the challenge. An initial attempt was made to analyse intercepted HTTP traffic using Burp Suite. This was a flawed approach, as DOM-based XSS vulnerabilities arise from insecure client-side JavaScript handling of user input. As a result, this approach did not reveal any suitable entry points that would allow direct DOM manipulation
 
 The investigation therefore shifted towards analysing user-controllable inputs present on the Juice Shop website, specifically the search functionality. When a value is entered into the search bar, the application generates the following URL:
-
+```js
 http://localhost:3000/#/search?q=TEST
-
+```
 Given that the vulnerability was DOM-based XSS, modifying the query parameter allowed arbitrary JavaScript execution within the browser. By altering the parameter to:
-
+```js
 http://localhost:3000/#/search?q=<iframe src="javascript:alert(\xss`)">
-
+```
 a JavaScript alert was successfully triggered, displaying the message “xss” on the screen. This confirmed the presence of a DOM-based Cross-Site Scripting vulnerability and completed the challenge.
 
 ## Solving the Reflected XSS challenge
@@ -87,6 +87,7 @@ The primary distinction between these two cases lies in the origin of the payloa
 - Course slides (04_XSS.pdf)
 - https://angular.dev/api/platform-browser/DomSanitizer
 - https://angular.dev/
+
 
 
 
