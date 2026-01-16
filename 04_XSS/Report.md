@@ -10,19 +10,22 @@ To perform the first attack, the required steps were relatively straightforward.
 The investigation therefore shifted towards analysing user-controllable inputs present on the Juice Shop website, specifically the search functionality. When a value is entered into the search bar, the application generates the following URL:
 
 http://localhost:3000/#/search?q=TEST
+
 Given that the vulnerability was DOM-based XSS, modifying the query parameter allowed arbitrary JavaScript execution within the browser. By altering the parameter to:
 
 http://localhost:3000/#/search?q=<iframe src="javascript:alert(\xss`)">
 
-A JavaScript alert was successfully triggered, displaying the message “xss” on the screen. This confirmed the presence of a DOM-based Cross-Site Scripting vulnerability and completed the challenge.
+a JavaScript alert was successfully triggered, displaying the message “xss” on the screen. This confirmed the presence of a DOM-based Cross-Site Scripting vulnerability and completed the challenge.
 
 ## Solving the Reflected XSS challenge
 To complete the second attack, it was first necessary to disable safetyMode within the OWASP Juice Shop configuration. As the application was deployed using Docker, this required modifying a configuration file inside the running container.
 Specifically, the default.yml configuration file was copied from the Docker container to the local Windows system using the following PowerShell command:
 - docker cp d39623d2e014:/juice-shop/config/default.yml ./default.yml
+  
 This command copies the configuration file from the container to the local directory, allowing it to be edited externally. Within the file, the parameter safetyMode: auto was identified and changed to safetyMode: disabled.
 After saving the modified configuration file, it was copied back into the Docker container using the following command:
 - docker cp ./default.yml d39623d2e014:/juice-shop/config/default.yml
+  
 Once the updated configuration was applied, safety mode was successfully disabled, enabling access to the previously unavailable (greyed-out) challenges.
 
 ![Photo of Reflected XSS challenge](images/Rxss.png)
@@ -30,6 +33,7 @@ Once the updated configuration was applied, safety mode was successfully disable
 Initially, the same initial approach was attempted by injecting the alert payload (<iframe src="javascript:alert(\xss`)">) into the query parameter following q=`. However, this did not successfully complete the challenge, indicating that the vulnerability differed from the previous DOM-based XSS scenario.
 
 Subsequently, various potential attack vectors were explored. The language selection functionality was tested but proved ineffective, as it relies on a controlled drop-down menu rather than free-form user input. Additional attempts were made by entering the payload into address input fields; however, these inputs did not result in script execution.
+
 Further investigation involved attempting to modify product names to include the payload, as product names are displayed in a pop-up notification after an item is added to the cart. Despite this being a plausible injection point, this approach also failed to trigger the vulnerability.
 
 ![Photo of product name change](images/productName.png)
@@ -80,9 +84,10 @@ The primary distinction between these two cases lies in the origin of the payloa
 
 ## References
 
-- Course slides (04_XSS)
+- Course slides (04_XSS.pdf)
 - https://angular.dev/api/platform-browser/DomSanitizer
 - https://angular.dev/
+
 
 
 
