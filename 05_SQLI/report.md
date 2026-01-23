@@ -192,5 +192,6 @@ In this case, the email was found while extracting data using SQL injection, but
 In fact, the review of the first product in the web app comes from an admin account, the email address of which is clearly visible. 
 
 
-![admin review](image-15.png)
+![admin review](images/image-15.png)
+
 
