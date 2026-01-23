@@ -22,7 +22,7 @@ http://localhost:3000/#/track-result/new?id=db85-94de94ee97c543bb';%20declare%20
 
 Burp was configured to intercept the traffic and once the request was received, it was forwarded to the Repeater tool to view the server's response. The results can be seen in the image below:
 
-![Image of first try](First.png)
+![Image of first try](images/First.png)
 
 The request did not return the expected data but instead triggered a server side error. This error exposed internal implementation details, clearly showing that the backend is not using a traditional SQL database. Specifically, the error response references the MarsDB database.
 
@@ -47,7 +47,7 @@ which is the html encoded version of:
 ' ORDER BY 1--
 ```
 
-![Image of second attempt](image-1.png)
+![Image of second attempt](images/image-1.png)
 
 As you can see this safely escapes our attempt. 
 
@@ -60,14 +60,14 @@ Attention then shifted to other interesting routes observed during normal applic
 
 Product-related endpoints such as /rest/products and /rest/products/:id/reviews were reachable and returned JSON arrays containing only catalog data, but were unrelated to user credentials.
 
-![Example of fails](image-4.png)
-![Example of fails 2](image-5.png)
+![Example of fails](images/image-4.png)
+![Example of fails 2](images/image-5.png)
 
 The breakthrough came when testing the search functionality. The /rest/products/search endpoint accepted user input and returned database errors when malformed input was supplied. 
 An SQLite error message revealed the full backend SQL query, confirming that the input had been concatenated into a ```LIKE '%…%'``` clause and executed directly by the database. 
 This finally identified a real SQL injection point, disclosing the query structure, the database type (SQLite), and the execution context.
 
-![First success](image-3.png)
+![First success](images/image-3.png)
 
 The error message basically exposed the query.
 
@@ -96,7 +96,7 @@ banana%' OR description LIKE '%banana%') AND 1=1) UNION SELECT email, password, 
 
 Note that the number of columns was easy to find. Using a "normal" input as a search query we get:
 
-![test query result](image-6.png)
+![test query result](images/image-6.png)
 
 From this we clearly see that the number of columns is 9. 
 
@@ -108,8 +108,8 @@ banana%25%27%20OR%20description%20LIKE%20%27%25banana%25%27)%20AND%201%3D1)%20UN
 
 Using this as our new payload in the HTTP request, we get:
 
-![HTTP Request](image-8.png)
-![Challange 1 SUCCESS!!!](image-7.png)
+![HTTP Request](images/image-8.png)
+![Challange 1 SUCCESS!!!](images/image-7.png)
 
 Note that we succeeded in exploiting the vulnerability even if the HTTP response appeared to be an error.
 From this error we can infer that this is probably due to the backend of OWASP Juice Shop expecting query results to match the Products data model. 
@@ -123,7 +123,7 @@ banana%25%27%20OR%20description%20LIKE%20%27%25banana%25%27)%20AND%201%3D1)%20UN
 
 the backend was able to process and display the desired data. 
 
-![data shown](image-16.png)
+![data shown](images/image-16.png)
 
 
 
@@ -141,23 +141,23 @@ After gathering user's credentials in the first challenge the next logical step 
 
 Just to confirm, logging in with this email address and password combination failed. This was expected, as the password is likely to be hashed, and the app probably does not treat password hashes as passwords by mistake.
 
-![login](image-9.png)
+![login](images/image-9.png)
 
 Examining the login procedure's requests and responses, we can see that the authentication response indicates that users are identified with a token probably assigned by the server upon registering.
 We will therefore focus on potential weaknesses in the registration process itself.
 
- ![registerin](image-10.png)
+ ![registerin](images/image-10.png)
 
 As can be clearly seen, the response follows a similar structure to that observed in the previous challenge. The server returns a set of structured user attributes as part of the response. 
 This indicates that this data could be derived directly from backend query results.
 
 Unfortunately, attempting to inject a payload during registration did not produce satisfactory results.
 
-![registration manipulation](image-11.png)
+![registration manipulation](images/image-11.png)
 
 After spending "a few" minutes trying to provoke an error or an unexpected result, the focus was shifted back to the login form with the goal of provoking an error there.
 
-![trying to error out the login form](image-12.png)
+![trying to error out the login form](images/image-12.png)
 
 ><cite>Finally a nice error!</cite>
 
@@ -175,7 +175,7 @@ admin@juice-sh.op' AND password = '0192023a7bbd73250516f069df18b500' AND deleted
 ```
 Inserting this payload into the email field of the login form, along withanything in the password section (as this will be commented out it does not matter) allows us to log in as admin thus, solving the chalenge!
 
-![login challange solved](image-14.png)
+![login challange solved](images/image-14.png)
 
 **Note** - we could also have not known the hash of the admin account. In this case we would manipulate the WHERE clause, to try to evaluate it to true. 
 
@@ -190,5 +190,6 @@ Please note that, due to the form of the original backend query, we need to know
 In this case, the email was found while extracting data using SQL injection, but there may be easier ways. For example, by exploring the web page. 
 
 In fact, the review of the first product in the web app comes from an admin account, the email address of which is clearly visible. 
+
 
 ![admin review](image-15.png)
