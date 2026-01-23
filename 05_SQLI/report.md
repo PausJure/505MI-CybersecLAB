@@ -1,4 +1,4 @@
-# 05_SQLi
+# **05_SQLi**
 
 This laboratory activity focuses on the practical exploitation of SQL injection vulnerabilities using the OWASP Juice Shop web application; an intentionally insecure platform designed for security training and awareness. 
 
@@ -193,5 +193,6 @@ In fact, the review of the first product in the web app comes from an admin acco
 
 
 ![admin review](images/image-15.png)
+
 
 
