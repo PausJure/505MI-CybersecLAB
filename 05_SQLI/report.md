@@ -22,7 +22,7 @@ http://localhost:3000/#/track-result/new?id=db85-94de94ee97c543bb';%20declare%20
 
 Burp was configured to intercept the traffic and once the request was received, it was forwarded to the Repeater tool to view the server's response. The results can be seen in the image below:
 
-![Image of first try](images/First.png)
+![Image of first try](images/image.png)
 
 The request did not return the expected data but instead triggered a server side error. This error exposed internal implementation details, clearly showing that the backend is not using a traditional SQL database. Specifically, the error response references the MarsDB database.
 
@@ -193,3 +193,4 @@ In fact, the review of the first product in the web app comes from an admin acco
 
 
 ![admin review](image-15.png)
+
