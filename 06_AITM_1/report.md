@@ -1,22 +1,26 @@
 # **06_AITM_1**
 
-This lab activity focuses on analyzing HTTPS security mechanisms, particularly HSTS, by performing and evaluating SSLStrip attacks using Burp Proxy.
+><cite>This lab activity focuses on analyzing HTTPS security mechanisms, particularly HSTS, by performing and evaluating SSLStrip attacks using Burp Proxy.</cite>
 
 
 ## Tools
 
 - Curl
-- Burp Suite
+- Excel
+- Burp Suite v2025.12.14
+
 
 ## Preliminary activity
 The preliminary activity involved examining some web pages to identify their HTTP/HTTPS configuration and HSTS support. The collected information will be used as input for the subsequent lab analysis.
 
-The full results can be found in the excel file inside the src folder of the github repository for this lab activity.
+The full results can be found in the excel file inside the folder of the github repository for this lab activity.
 
-20 web pages were examined using ```curl -I <http://domain>``` followed by ```curl -I <https://domain>```. This made the analysis of the status codes and headers quite straightforward.
+20 web pages were examined using ```curl -I <http://domain>``` followed by ```curl -I <https://domain>```. Using curl -I made the analysis of the status codes and headers quite straightforward.
 
-![examplehttp](images/image.png)
-![examplehttps](images/image-1.png)
+<p align="center">
+  <img src="images/image.png" width="45%" />
+  <img src="images/image-1.png" width="45%" />
+</p>
 
 Examining the gathered data from the excel table we can clearly see a few patterns: 
 
@@ -26,24 +30,27 @@ Examining the gathered data from the excel table we can clearly see a few patter
 
 The key takeaway from this analysis is that most of the examined websites correctly enforce HTTPS by redirecting HTTP traffic, and over half implement HSTS, significantly reducing the effectiveness of SSLStrip attacks, although a small number still exhibit misconfigurations or block http entirely. Note that the roughly 50% addoption is a rough rappresentation of the real world deployment, which, according to [w3techs.com](https://w3techs.com/technologies/details/ce-hsts) sits around 31.5%. Increasing the number of tested websites would likely cause the measured value to converge toward this percentage.
 
-According to [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security#directives), a Strict-Transport-Security policy with a max-age of at least one year is acceptable, although a duration of two years is recommended for robust protection. Furthermore, if a host accepts insecure HTTP requests, it should respond with a permanent redirect (e.g., HTTP 301) to an HTTPS URL, and the Strict-Transport-Security header must be sent only over HTTPS, never in response to an HTTP request. While most analyzed websites comply with this behavior, some deviations were observed. In particular, apple.com and inps.it incorrectly include the HSTS header in HTTP responses, representing a misconfiguration that diverges from the specification. Additionally, comune.trieste.it does not respond to HTTP requests at all, effectively blocking insecure access rather than redirecting it, and predsjednik.hr has set ```max-age=0, includeSubDomains``` but, as per MDN, that has no effect on includeSubDomain since the domain that specified includeSubDomains is immediately deleted from the HSTS hosts list; So since ```max-age=0``` disables HSTS including ```includeSubDomains``` in this context appears to also be a misconfiguration. 
+><cite>According to [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security#directives), a Strict-Transport-Security policy with a max-age of at least one year is acceptable, although a duration of two years is recommended for robust protection. Furthermore, if a host accepts insecure HTTP requests, it should respond with a permanent redirect (e.g., HTTP 301) to an HTTPS URL, and the STS header must be sent only over HTTPS, never in response to an HTTP request.</cite>
 
-In conclusion, the analyzed data indicates that large corporations are generally more likely to implement HSTS, whereas smaller brands and organizations tend to adopt this security mechanism less frequently. Naturally, there also are exceptions to this trend, as can be seen in the table.
+While most analyzed websites comply with this behavior, some deviations were observed. In particular, *apple.com* and *inps.it* incorrectly include the HSTS header in HTTP responses, representing a misconfiguration that diverges from the specification. Additionally, *comune.trieste.it* does not respond to HTTP requests at all, effectively blocking insecure access rather than redirecting it, and *predsjednik.hr* has set ```max-age=0, includeSubDomains``` but, as per MDN, that has no effect on includeSubDomain since the domain that specified includeSubDomains is immediately deleted from the HSTS hosts list; So since ```max-age=0``` disables HSTS, including ```includeSubDomains``` in this context appears to also be a misconfiguration. 
+
+In conclusion, the analyzed data indicates that large corporations are generally more likely to implement HSTS, whereas smaller brands and organizations tend to adopt this security mechanism less frequently. Naturally, there also are exceptions to this trend, as can be seen in the provided excel table.
 
 
-
+&nbsp;
 ## CASE A
-The following activity explores the practical implementation of an SSLStrip attack using Burp Proxy, demonstrating how traffic on a site without HSTS can be intercepted and subsequently modified to compromise sensitive data.
+><cite>The following activity explores the practical implementation of an SSLStrip attack using Burp, demonstrating how traffic on a site without HSTS can be intercepted and subsequently modified to compromise sensitive data.</cite>
 
 To configure Burp we need to go to: ```Settings → Proxy listeners → Edit the only interface → Request handling → Force use of TLS```. 
-We then also need to configure a few rules. Specifically go to: ``` Settings → Proxy → Response modification rules ``` and we need to enable ```Convert HTTPS links to HTTP``` and ```Remove secure flag from cookies```.
+We then also need to configure a few rules. Specifically go to: ``` Settings → Proxy → Response modification rules ``` and we need to enable ```Convert HTTPS links to HTTP``` and ```Remove secure flag from cookies``` since modern websites embed HTTPS links inside their pages and if not rewritten the browser could switch to HTTPS; the secure flag is removed from cookies because those are sent only over HTTPS and thus they will not be sent on HTTP, potentialy braking the session.
+
+<p align="center">
+  <img src="images/image-2.png" width="45%" />
+  <img src="images/image-4.png" width="45%" />
+</p>
 
 
-![forceTLS](images/image-2.png).
-![rules](images/image-4.png)
-
-
-Then go to ```Settings → Proxy → Response Intercept Rules``` and check the box Intercept responses based on the following rule and make sure the rule for Content type header matches text is enabled.
+Then go to ```Settings → Proxy → Response Intercept Rules``` and check the box ```Intercept responses based on the following rule``` and make sure the rule for ```Content type header matches text``` is enabled.
 
 ![interceptResponseRules](images/image-7.png)
 
@@ -54,37 +61,46 @@ Another rule we need to add is in: ```Settings → Proxy → Match and replace r
 
 We can then Point the browser to the plain HTTP version of the target site and observe the potential impact.
 
-For example we can acess http://www.goliardicats.it which does not have HSTS. Going to the login form and inputing our credentials: 
+The website chosen for this example is ```http://www.goliardicats.it``` which does not use HSTS. We then navigate to the login form and enter our credentials: 
+
 ![goliardicaLogin](images/image-6.png)
 
-Looking at the http history we can see the credentials in plain text:
+Looking at the HTTP history we can see the credentials in plain text:
+
 ![goliardicahttpcredentials](images/image-5.png)
 
 Another thing we could do is we could modify the response, for this we need to turn on intercept. As we saw, the response to the login form contained HTML code, we can remove it and add our own!
 
-original:
+Original:
+
 ![originalResponse](images/image-8.png)
-original result:
+
+Original result:
+
 ![origigi Result](images/image-11.png)
-modified:
+
+Modified:
+
 ![modified response](images/image-9.png)
-modified result:
+
+Modified result:
+
 ![pwned](images/image-10.png)
 
 
 
 It is clear that the ramifications of this type of attack are huge. For example the modified webpage could be simmilar to the desired successful login page, making the user think he logged in while we silently steal his credentials and change his password, hijjacking his account. 
 
-Also, if a user was on a banking page which does not use HSTS, and the user sends 1000$ to iban Y we could modify the request and send 10000$ to iban X, while modifying the server response so the user recieves a  payment confirmation page for the original 1000$, masking the theft entirely.
+Further more, if a user was on a banking page which does not use HSTS, and the user sends 1000$ to iban Y we could modify the request and send 10000$ to iban X, while modifying the server response so the user recieves a  payment confirmation page for the original 1000$, masking the theft entirely.
 
-Essentially, if the victim fails to notice that the session has been downgraded to HTTP or if a valid certificate is installed on their device, the site continues to function normally. In this scenario, the victim has no reason to suspect that their plaintext data is being intercepted or manipulated in real time. This makes the exploit particularly dangerous.
+Essentially, if the victim fails to notice that the session has been downgraded to HTTP, or if a valid certificate has been installed on their device by the adversary, the site continues to function normally with little or no visible warning. In this scenario, the victim has no reason to suspect that their data is being intercepted or manipulated in real time, as the HTTP downgrade goes unnoticed. This makes the exploit particularly dangerous for non technical users, who may not recognize subtle security indicators in the browser.
 
 
-
+&nbsp;
 ## CASE B
-The following activity builds on Case A by analyzing an SSLStrip attack against a website that implements Strict Transport Security (HSTS), using Burp Proxy to demonstrate how HSTS mitigates downgrade attacks depending on the site’s presence in the browser’s HSTS set.
+><cite>The following activity builds on Case A by analyzing an SSLStrip attack against a website that implements Strict Transport Security, using Burp to demonstrate how HSTS mitigates downgrade attacks depending on the site’s presence in the browser’s HSTS list.</cite>
 
-The chosen website is www.apple.com. 
+The chosen website is ```www.apple.com```. 
 
 Looking at the HSTS status at: ```chrome://net-internals/#hsts``` we find that it is not listed there.
 
@@ -98,25 +114,30 @@ We have 3 possible HSTS statuses:
 - Present (Subsequent visit)
 - Preloaded (Always present)
 
+&nbsp;
 ### Case: Not Present (first visit)
-We intercept a request for www.apple.com, note the Upgrade-Insecure-Requests: 1 header. THere is no need to set it to 0 since it does not prevent SSL stripping because it is only a browser preference, not an enforced security control. The header just signals that the browser would like to use HTTPS but Burp operates on the response after the request is sent, effectively ignoring the browser’s preference by responding with HTTP. In contrast, HSTS is mandatory and enforced by the browser, which explains why we need to remove the HSTS header in order to perform our attack.
+We intercept a request for www.apple.com, note the Upgrade-Insecure-Requests: 1 header. There is no need to set it to 0 since it does not prevent SSL stripping because it is only a browser preference, not an enforced security control. The header just signals that the browser would like to use HTTPS but Burp operates on the response after the request is sent, effectively *ignoring the browser’s preference* by responding with HTTP. In contrast, HSTS is mandatory and enforced by the browser, which explains why we need to remove the HSTS header in order to perform our attack.
 
 ![forwardForHTTPapple](images/image-13.png)
 
-We then click on the watch series 11 page on the website:
+We then click on the *"watch series 11 page"* on the website:
+
 ![WatchSeries11](images/image-14.png)
 
 We can now remove the HSTS header and modify the HTML to our whishes:
-![response with html](images/image-15.png) -> remove sts header and add my html
+
+![response with html](images/image-15.png)
 
 As a result we get:
+
 ![pwnedV2](images/image-16.png)
+
 
 
 Proving that SSLstrip is possible in this case.
 
 
-
+&nbsp;
 ### Case: Present (Subsequent visit)
 We first visit www.apple.com normally, withouth removing HSTS headers, and then repeat the same steps as in the previous case. 
 
@@ -124,15 +145,16 @@ Since visiting the Apple website did not load HSTS into the browser’s HSTS lis
 
 ![adding ww.apple.com](images/image-17.png)
 
-The next image shows that When attempting to access ```http://www.apple.com```, the browser automatically redirects the request to HTTPS, which is visible in the address bar. The HTTPS indicator is marked in red because the browser detects the Burp proxy certificate.
+The next image shows that When attempting to access ```http://www.apple.com```, the browser automatically redirects the request to the HTTPS version, which is visible in the address bar. The HTTPS indicator is marked in red because the browser detects the Burp proxy certificate, letting the user know that the content is being proxied. 
 
 ![appleHTTPS](images/image-19.png)
 
 
-If we now turn on intercept and try to capture and modify data: 
+If we now turn on intercept inside Burp and capture data:
+
 ![intercept after hsts](images/image-20.png)
 
-And if we now click on the watch series 11 page as before and modify the html in the response 
+Clicking on the *"watch series 11"* page as we did before and modifying the HTML in the response:
 
 ![modifyWithHSTS](images/image-21.png)
 
@@ -140,9 +162,9 @@ we get:
 
 ![result](images/image-22.png)
 
-After enabling interception and modifying the HTML response as before, we observed that the attack still appeared to succeed. However, the reason is fundamentally different from the previous case. With HSTS enabled, all HTTP connections are forcibly upgraded to HTTPS, which is evident both in the browser UI and in the structure of the intercepted requests.
+Thus, after enabling interception and modifying the HTML response as before, we observed that the attack still appeared to succeed. However, the reason is fundamentally different from the previous case. With HSTS enabled, all HTTP connections are forcibly upgraded to HTTPS, which is evident both in the browser UI and in the structure of the intercepted requests.
 
-The attack works here not because HSTS was bypassed, but because the Burp browser explicitly trusts the PortSwigger CA. This allows Burp to issue a valid-looking certificate, decrypt HTTPS traffic, and modify responses. In a real-world scenario, where the attacker does not have a trusted certificate installed on the victim’s device, HSTS would fully prevent interception and modification of the traffic.
+The attack works here not because HSTS was bypassed, but because the Burp browser explicitly trusts the PortSwigger CA. This allows Burp to issue a valid certificate, decrypt HTTPS traffic, and modify responses. In a real-world scenario, where the attacker does not have a trusted certificate installed on the victim’s device, HSTS would fully prevent interception and modification of the traffic, since it would be encrypted.
 
 The key takeaway is that HSTS functioned correctly. The apparent success of the attack is due to a full Adversary in the middle (AITM) attack, which is far more powerful and unrealistic in typical real-world conditions.
 
@@ -158,4 +180,5 @@ In this case, however, Burp was used to manipulate the communication itself betw
 
 ---
 
-Jure Paus
+
+Jure Paus, 25.1.2026.
