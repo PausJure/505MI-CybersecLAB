@@ -2,14 +2,14 @@
 
 ><cite>This lab activity focuses on analyzing HTTPS security mechanisms, particularly HSTS, by performing and evaluating SSLStrip attacks using Burp Proxy.</cite>
 
-
+&nbsp;
 ## Tools
 
 - Curl
 - Excel
 - Burp Suite v2025.12.14
 
-
+&nbsp;
 ## Preliminary activity
 The preliminary activity involved examining some web pages to identify their HTTP/HTTPS configuration and HSTS support. The collected information will be used as input for the subsequent lab analysis.
 
@@ -182,3 +182,4 @@ In this case, however, Burp was used to manipulate the communication itself betw
 
 
 Jure Paus, 25.1.2026.
+
