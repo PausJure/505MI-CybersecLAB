@@ -91,7 +91,7 @@ Modified result:
 
 It is clear that the ramifications of this type of attack are huge. For example the modified webpage could be simmilar to the desired successful login page, making the user think he logged in while we silently steal his credentials and change his password, hijjacking his account. 
 
-Further more, if a user was on a banking page which does not use HSTS, and the user sends 1000$ to iban Y we could modify the request and send 10000$ to iban X, while modifying the server response so the user recieves a  payment confirmation page for the original 1000$, masking the theft entirely.
+Further more, if a user was on a banking page which does not use HSTS, and the user sends 1000€ to iban Y we could modify the request and send 10000€ to iban X, while modifying the server response so the user recieves a  payment confirmation page for the original 1000€, masking the theft entirely.
 
 Essentially, if the victim fails to notice that the session has been downgraded to HTTP, or if a valid certificate has been installed on their device by the adversary, the site continues to function normally with little or no visible warning. In this scenario, the victim has no reason to suspect that their data is being intercepted or manipulated in real time, as the HTTP downgrade goes unnoticed. This makes the exploit particularly dangerous for non technical users, who may not recognize subtle security indicators in the browser.
 
@@ -182,4 +182,5 @@ In this case, however, Burp was used to manipulate the communication itself betw
 
 
 Jure Paus, 25.1.2026.
+
 
