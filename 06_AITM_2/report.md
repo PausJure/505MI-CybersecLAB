@@ -2,12 +2,14 @@
 
 In this lab activity, we are tasked with exploring a Man-in-the-Middle (AitM) attack using ARP cache spoofing. The goal of the lab is to understand how an attacker can intercept and manipulate network communications between hosts. Through the provided SeedLabs environment, we analyze the behavior of protocols such as Telnet and netcat and observe their security weaknesses.
 
+---
 
 ## Tools
 
 - SEEDlabs_VM (Ubuntu 20.04 LTS)
 - Oracle Virtualbox (Version 7.2.0)
 
+---
 
 ## Initial Setup
 The first thing to do was to set up our working enviroment, that is our LAB. To do so the SEED VM was [downloaded](https://seedsecuritylabs.org/labsetup.html) and a [setup guide](https://github.com/seed-labs/seed-labs/blob/master/manuals/vm/seedvm-manual.md) was followed.
@@ -18,12 +20,13 @@ If we now run the ```docker ps``` command we should see the three machines creat
 
 ![docker ps](images/image.png)
 
-
-
+&nbsp;
+&nbsp;
 ## Task 1: Arp Cache Poisoning
 
 This task requires us to perform three different methods of arp spoofing.
 
+&nbsp;
 ### Task 1.A (using ARP request)
 ><cite>On host M, construct an ARP request packet to map B’s IP address to M's MACaddress. Send the packet to A and check whether the attack is successful or not.</cite>
 
@@ -90,9 +93,11 @@ As can be seen from the image the attack was successful; on host M, we construct
 
 Note that we have specified the destination of the ethernet layer to be A since it was specified to send the packet to A. In a real-world scenario we wouldn't have that info and we would have broadcasted the frame, meaning all other hosts would also receive it but probably ignore it. 
 
+&nbsp;
 ### Task 1.B (using ARP reply)
 ><cite>On host M, construct an ARP reply packet to map B’s IP address to M’s MAC address. Send the packet to A and check whether the attack is successful or not. Try the attack under the following two scenarios, and report the results of your attack:</cite>
 
+&nbsp;
 #### Scenario 1: B’s IP is already in A’s cache.
 to setup this scenario we first need to fill A's Arp cache with B's IP and MAC since now it is empty. So we ping B from A.
 
@@ -135,7 +140,7 @@ We again store this code inside the volumes folder so it can bea accessed and ex
 
 In Scenario 1, Host A’s ARP cache already contained a valid mapping for Host B. After sending a forged ARP reply from Host M, the existing entry was overwritten, and B’s IP address was incorrectly associated with M’s MAC address. This demonstrates that ARP replies are trusted even when correct entries already exist.
 
-
+&nbsp;
 #### Scenario 2: B’s IP is not in A’s cache
 
 First we clear A's Cache with ```arp -d 10.9.0.6```.
@@ -151,7 +156,7 @@ In the cache of A we have:
 
 The cache remains empty, this indicates that if no ARP entry exists, host A ignores unsolicited ARP replies to prevent attackers from creating fake mappings; however, if an entry already exists, unsolicited replies are accepted as updates, which makes ARP poisoning possible.
 
-
+&nbsp;
 ### Task 1.C (using ARP gratuitous message)
 ><cite>On host M, construct an ARP gratuitous packet, and use it to map B’s IP address to M’s MAC address. Please launch the attack under the same two scenarios as those described in Task 1.B.</cite>
 
@@ -215,14 +220,15 @@ As can be seen host A does not create new ARP cache entries in response to gratu
 
 
 
-
-
+&nbsp;
+&nbsp;
 ## TASK 2: MITMAttackonTelnet using ARP Cache Poisoning
 
 To complete the task we first need to setup host M to continuously send spoofed ARP replies to both A and B, poisoning their ARP caches so that each host associates the other’s IP address with M’s MAC address, enabling a man in the middle attack. 
 
 We need to do so continously because ARP cache entries expire and legitimate traffic may owerwrite our entries.
 
+&nbsp;
 ### Step 1 (Launch the ARP cache poisoning attack)
 To do so we will write a python script that complies with the requirements. Note that we will use ARP replies to poison our victims, basically assuming an entry already exists which is reasonable. ARP replies are preferred over ARP requests for cache poisoning because they are more consistently accepted as updates to existing ARP entries, whereas unsolicited ARP requests are often ignored or restricted by modern operating systems.
 
@@ -291,7 +297,7 @@ Executing the attack from M (Bottom right) and viewing the arp caches of A (Top 
 
 We can see we successfuly ran the MITM attack.
 
-
+&nbsp;
 ### Step 2 (Testing)
 
 We are required to turn off IP forwarding on Host M using the following command: 
@@ -309,6 +315,7 @@ Wireshark captures on host M show repeated spoofed ARP replies advertising both 
 
 ![a nad b fail ping](images/image-30.png)
 
+&nbsp;
 ### Step 3 (Turn on IP forwarding)
 ><cite>Now we turn on the IP forwarding on Host M, so it will forward the packets between A and B.</cite>
 
@@ -336,7 +343,7 @@ Note that some ICMP echo requests appear as “no response found” because the 
 
 
 
-
+&nbsp;
 ### Step 4 (Launch the MITM attack)
 
 The first thing we need to do is we need to create a telnet connection between A and B. To do so we do the following:
@@ -426,7 +433,8 @@ After disabling IP forwarding on Host M, the original packets were no longer for
 
 ![final results](images/image-37.png)
 
-
+&nbsp;
+&nbsp;
 ## TASK 3: MITM Attack on Netcat using ARP Cache Poisoning
 
 This should be simmilar to the previous TASK. Telnet was an interactive protocol in which each keystroke typically generates an individual TCP packet, and characters are displayed only after being echoed back by the server. 
@@ -515,7 +523,7 @@ sniff(iface="eth0", filter=f_ilter, prn=spoof_pkt)
 
 Experimental results showed that messages typed on Host A appeared altered on Host B, while the TCP connection remained intact, demonstrating a successful application‑layer man in the middle attack on Netcat.
 
-
+&nbsp;
 ## Conclusion
 In this lab, we demonstrated the feasibility and impact of ARP cache poisoning attacks in a local network.  By exploiting the lack of authentication in the ARP protocol, Host M successfully positioned itself as a man in the middle between Hosts A and B. Through controlled experiments, we showed how ARP replies and gratuitous ARP messages can be used to poison ARP caches under different conditions. 
 
@@ -526,3 +534,7 @@ Finally, man in the middle attacks were implemented on both Telnet and Netcat co
 Overall, this lab highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
 
 
+&nbsp;
+&nbsp;
+## Disclaimer ⚠️
+The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
