@@ -11,6 +11,8 @@ In this lab activity, we are tasked with exploring a Man-in-the-Middle (AitM) at
 
 ---
 
+&nbsp;
+&nbsp;
 ## Initial Setup
 The first thing to do was to set up our working enviroment, that is our LAB. To do so the SEED VM was [downloaded](https://seedsecuritylabs.org/labsetup.html) and a [setup guide](https://github.com/seed-labs/seed-labs/blob/master/manuals/vm/seedvm-manual.md) was followed.
 
@@ -538,3 +540,4 @@ Overall, this lab highlighted the security weaknesses of ARP and underscored the
 &nbsp;
 ## Disclaimer ⚠️
 The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
+
