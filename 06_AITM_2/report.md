@@ -16,7 +16,7 @@ After the setup we have our working enviroment where we just need to extract the
 
 If we now run the ```docker ps``` command we should see the three machines creating our little network, that is, more precisely, the three docker containers.
 
-![docker ps](image.png)
+![docker ps](images/image.png)
 
 
 
@@ -521,5 +521,6 @@ In this lab, we demonstrated the feasibility and impact of ARP cache poisoning a
 
 We further illustrated the consequences of such attacks by disrupting communication when IP forwarding was disabled and by transparently intercepting and modifying application layer data when forwarding was selectively controlled. 
 Finally, man in the middle attacks were implemented on both Telnet and Netcat connections, demonstrating how differences in application behavior affect packet manipulation strategies. 
+
 
 Overall, this lab highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
