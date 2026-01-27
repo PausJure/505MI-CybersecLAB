@@ -223,7 +223,7 @@ To complete the task we first need to setup host M to continuously send spoofed 
 
 We need to do so continously because ARP cache entries expire and legitimate traffic may owerwrite our entries.
 
-#### Step 1 (Launch the ARP cache poisoning attack)
+### Step 1 (Launch the ARP cache poisoning attack)
 To do so we will write a python script that complies with the requirements. Note that we will use ARP replies to poison our victims, basically assuming an entry already exists which is reasonable. ARP replies are preferred over ARP requests for cache poisoning because they are more consistently accepted as updates to existing ARP entries, whereas unsolicited ARP requests are often ignored or restricted by modern operating systems.
 
 So to begin we ping A from B and B from A to fill the ARP caches.
@@ -292,7 +292,7 @@ Executing the attack from M (Bottom right) and viewing the arp caches of A (Top 
 We can see we successfuly ran the MITM attack.
 
 
-#### Step 2 (Testing)
+### Step 2 (Testing)
 
 We are required to turn off IP forwarding on Host M using the following command: 
 
@@ -309,7 +309,7 @@ Wireshark captures on host M show repeated spoofed ARP replies advertising both 
 
 ![a nad b fail ping](images/image-30.png)
 
-#### Step 3 (Turn on IP forwarding)
+### Step 3 (Turn on IP forwarding)
 ><cite>Now we turn on the IP forwarding on Host M, so it will forward the packets between A and B.</cite>
 
 we can do so by running the following command on M:
@@ -337,7 +337,7 @@ Note that some ICMP echo requests appear as “no response found” because the 
 
 
 
-#### Step 4 (Launch the MITM attack)
+### Step 4 (Launch the MITM attack)
 
 The first thing we need to do is we need to create a telnet connection between A and B. To do so we do the following:
 
@@ -524,4 +524,5 @@ Finally, man in the middle attacks were implemented on both Telnet and Netcat co
 
 
 Overall, this lab highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
+
 
