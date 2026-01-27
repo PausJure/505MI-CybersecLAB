@@ -510,7 +510,7 @@ sniff(iface="eth0", filter=f_ilter, prn=spoof_pkt)
 
 ```
 
-![Result](images/images/image-41.png)
+![Result](images/image-41.png)
 
 
 Experimental results showed that messages typed on Host A appeared altered on Host B, while the TCP connection remained intact, demonstrating a successful application‑layer man in the middle attack on Netcat.
@@ -524,3 +524,4 @@ Finally, man in the middle attacks were implemented on both Telnet and Netcat co
 
 
 Overall, this lab highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
+
