@@ -16,9 +16,9 @@ In this lab activity, we are tasked with exploring a Adversary in the Middle (Ai
 ## Initial Setup
 The first step was to set up our working environment, namely the lab. To do this, we [downloaded](https://seedsecuritylabs.org/labsetup.html) the SEED VM and followed the provided [setup guide](https://github.com/seed-labs/seed-labs/blob/master/manuals/vm/seedvm-manual.md).
 
-After the setup we have our working enviroment where we just need to extract the labsetup.zip and follow the [provided instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf).
+Once the setup is complete, the working environment is ready. The remaining steps involve extracting the labsetup.zip file and following the [provided instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf).
 
-If we now run the ```docker ps``` command we should see the three machines creating our little network, that is, more precisely, the three docker containers.
+If we now run the ```docker ps command```, we should see the three machines that make up our small network; more precisely, the three Docker containers.
 
 ![docker ps](images/image.png)
 
@@ -28,7 +28,6 @@ If we now run the ```docker ps``` command we should see the three machines creat
 
 This task requires us to perform three different methods of arp spoofing.
 
-&nbsp;
 ### Task 1.A (using ARP request)
 ><cite>On host M, construct an ARP request packet to map B’s IP address to M's MACaddress. Send the packet to A and check whether the attack is successful or not.</cite>
 
@@ -51,7 +50,7 @@ we do the same for A and get:
 ![A MAC](images/image-5.png)
 
 Now we need to construct the ARP request.
-Following the code skeleton provided in the [provided instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf) we construct the following Packet:
+Following the code skeleton provided in the [instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf) we construct the following packet:
 
 ```py
 #!/usr/bin/env python3
@@ -73,27 +72,30 @@ pkt = E / A
 sendp(pkt)
 
 ```
-we use nano, to create a python file, and we put it inside the volumes folder which is shared with the containers
+we use nano, to create a python file, and we put it inside the ```volumes``` folder which is shared between the VM and the containers.
 ```sh
 nano arp_request_1A.py
 ```
 ![volumes folder](images/image-7.png)
 
-Note now that before execution the ARP cache in A is empty:
+Note now that before execution the ARP cache in A was empty:
 
 ![ARP cache A empty](images/image-6.png)
 
-We now go back to the M container to execute the attack.
+We can now go back to the M container to execute the attack.
+```sh
+python3 arp_request_1A.py
+```
 
 ![attack execution](images/image-8.png)
 
-to check if it was successful we need to look in the ARP cache of A again and see if IP-B is present with MAC-M.
+To check if it was successful we need to look in the ARP cache of A again and see if IP-B is present with MAC-M.
 
 ![Arp cache A success](images/image-9.png)
 
 As can be seen from the image the attack was successful; on host M, we constructed a forged ARP request packet using Scapy, where the source IP address was set to host B’s IP and the source MAC address to host M’s MAC. The packet was sent to host A. By inspecting host A’s ARP cache, we observed that the mapping between B’s IP address and M’s MAC address was incorrectly stored, confirming that the ARP cache poisoning attack was successful.
 
-Note that we have specified the destination of the ethernet layer to be A since it was specified to send the packet to A. In a real-world scenario we wouldn't have that info and we would have broadcasted the frame, meaning all other hosts would also receive it but probably ignore it. 
+Note that we have specified the destination of the ethernet layer to be A since we were required to send the packet explicitly to A. In a real-world scenario we wouldn't have A's MAC address so we would have broadcasted the frame, meaning all other hosts would also receive it but probably ignore it. 
 
 &nbsp;
 ### Task 1.B (using ARP reply)
@@ -101,7 +103,7 @@ Note that we have specified the destination of the ethernet layer to be A since 
 
 &nbsp;
 #### Scenario 1: B’s IP is already in A’s cache.
-to setup this scenario we first need to fill A's Arp cache with B's IP and MAC since now it is empty. So we ping B from A.
+To setup this scenario we first need to fill A's Arp cache with B's IP and MAC since now it is empty. We can do so easily by using ```ping``` to ping B from A.
 
 ```ping 10.9.0.6``` 
 
@@ -109,7 +111,7 @@ if we now run ```arp -n``` on A we see the entry for B.
 
 ![A cache](images/image-10.png)
 
-now we construct the code to execute taask 1.B:
+Now we construct the code to execute taask 1.B:
 
 ```py
 #!/usr/bin/env python3
@@ -133,11 +135,15 @@ sendp(pkt)
 
 ```
 
-We again store this code inside the volumes folder so it can bea accessed and executed by M.
+We again store this code inside the ```volumes``` folder so it can be accessed and executed by M.
 
 ![added arp_reply_1B.py](images/image-11.png)
 
+Run the python script:
 ![execution](images/image-12.png)
+
+A's ARP cache before and after script execution by M:
+
 ![A cache before and after exec](images/image-13.png)
 
 In Scenario 1, Host A’s ARP cache already contained a valid mapping for Host B. After sending a forged ARP reply from Host M, the existing entry was overwritten, and B’s IP address was incorrectly associated with M’s MAC address. This demonstrates that ARP replies are trusted even when correct entries already exist.
@@ -149,7 +155,7 @@ First we clear A's Cache with ```arp -d 10.9.0.6```.
 
 ![clear A cache](images/image-14.png)
 
-we then run the same python ARP reply script as in scenario 1.
+We then run the same python ARP reply script as in scenario 1.
 ![send arp reply](images/image-15.png)
 
 In the cache of A we have: 
@@ -165,13 +171,17 @@ The cache remains empty, this indicates that if no ARP entry exists, host A igno
 To have B inside A's ARP Cache we first ping B again.
 ![ping B from A](images/image-17.png)
 
-Lets Construct a gratuitous ARP message thath will map B's IP to M's MAC:
+Let's construct a gratuitous ARP message that maps B's IP to M's MAC:
+
+---
 
 A gratuitous ARP has the following key characteristics: 
 
 - The source and destination IP addresses are the same, and they are the IP address of the host issuing the gratuitous ARP.
 
--  Thedestination MAC addresses in both ARP header and Ethernet header are the broadcast MAC address (ff:ff:ff:ff:ff:ff).
+-  The destination MAC addresses in both ARP header and Ethernet header are the broadcast MAC address (ff:ff:ff:ff:ff:ff).
+
+---
 
 ```py
 #!/usr/bin/env python3
@@ -194,7 +204,7 @@ sendp(pkt)
 
 ```
 
-We now create a python file for gratuitous ERP in the volumes folder:
+We now create a python file for gratuitous ARP in the ```volumes``` folder:
 
 ![aded gratARP.py](images/image-18.png)
 
@@ -202,12 +212,12 @@ Sending the packet:
 
 ![packet sent](images/image-19.png)
 
-Arp cache in A, before and after:
+ARP cache in A, before and after:
 
 ![arp cache A after](images/image-20.png)
 
 
-Clearing A's ARP cache to try to send the packet again but with A's cache empty as per requirement:
+><cite>Clearing A's ARP cache to try to send the packet again but with A's cache empty as per requirement:</cite>
 
 ![clearing A cache](images/image-21.png)
 
@@ -540,5 +550,6 @@ Overall, this lab highlighted the security weaknesses of ARP and underscored the
 &nbsp;
 ## Disclaimer ⚠️
 The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
+
 
 
