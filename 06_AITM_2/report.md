@@ -1,6 +1,6 @@
 # **06_AITM_2**
 
-In this lab activity, we are tasked with exploring a Man-in-the-Middle (AitM) attack using ARP cache spoofing. The goal of the lab is to understand how an attacker can intercept and manipulate network communications between hosts. Through the provided SeedLabs environment, we analyze the behavior of protocols such as Telnet and netcat and observe their security weaknesses.
+In this lab activity, we are tasked with exploring a Adversary in the Middle (AitM) attack using ARP cache spoofing. The goal of the lab is to understand how an attacker can intercept and manipulate network communications between hosts. Through the provided SeedLabs environment, we analyze the behaviour of protocols such as Telnet and Netcat and observe their security weaknesses.
 
 ---
 
@@ -14,7 +14,7 @@ In this lab activity, we are tasked with exploring a Man-in-the-Middle (AitM) at
 &nbsp;
 &nbsp;
 ## Initial Setup
-The first thing to do was to set up our working enviroment, that is our LAB. To do so the SEED VM was [downloaded](https://seedsecuritylabs.org/labsetup.html) and a [setup guide](https://github.com/seed-labs/seed-labs/blob/master/manuals/vm/seedvm-manual.md) was followed.
+The first step was to set up our working environment, namely the lab. To do this, we [downloaded](https://seedsecuritylabs.org/labsetup.html) the SEED VM and followed the provided [setup guide](https://github.com/seed-labs/seed-labs/blob/master/manuals/vm/seedvm-manual.md).
 
 After the setup we have our working enviroment where we just need to extract the labsetup.zip and follow the [provided instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf).
 
@@ -540,4 +540,5 @@ Overall, this lab highlighted the security weaknesses of ARP and underscored the
 &nbsp;
 ## Disclaimer ⚠️
 The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
+
 
