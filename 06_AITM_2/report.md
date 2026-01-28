@@ -250,7 +250,7 @@ So to begin we ping A from B and B from A to fill the ARP caches.
 
 ![pinging with cache](images/image-25.png)
 
-We can now construct a python executable that will constantly send packets, poisoning A and B and establishing M as the MITM. 
+We can now construct a python executable that will constantly send packets, poisoning A and B and establishing M as the AITM. 
 
 ```py
 #!/usr/bin/env python3
@@ -293,19 +293,19 @@ pkt_to_B = E_to_B / ARP_to_B
 print("[*] Starting ARP cache poisoning (full control)... Press Ctrl+C to stop.")
 
 while True:
-    sendp(pkt_to_A, verbose=False)
-    sendp(pkt_to_B, verbose=False)
+    sendp(pkt_to_A)
+    sendp(pkt_to_B)
     time.sleep(5)
 
 ```
 
-With this code host M explicitly constructs Ethernet and ARP reply packets and sends them periodically to both A and B, causing each host to associate the other’s IP address with M’s MAC address, establishing a man in the middle position.
+With this code host M explicitly constructs Ethernet and ARP reply packets and sends them periodically to both A and B, causing each host to associate the other’s IP address with M’s MAC address, establishing an adversary in the middle position.
 
-We can now create the python fie inside the volumes folder:
+We can now create the python file inside the ```volumes``` folder:
 
 ![volumes folder](images/image-26.png)
 
-Executing the attack from M (Bottom right) and viewing the arp caches of A (Top left) and B (Top right):
+Executing the attack from M (bottom right) and viewing the ARP caches of A (top left) and B (top right):
 
 ![attacking MITM](images/image-27.png)
 
@@ -321,11 +321,11 @@ sysctl net.ipv4.ip_forward=0
 ```
 ![set ip forward to 0](images/image-28.png)
 
-We then need to observe what happens in wireshark when we ping A and B between eachother. 
+We then need to observe what happens in Wireshark when we ping A and B between eachother. 
 
 ![wireshark](images/image-29.png)
 
-Wireshark captures on host M show repeated spoofed ARP replies advertising both 10.9.0.5 and 10.9.0.6 as being mapped to M’s MAC address, confirming successful ARP cache poisoning. Subsequently, ICMP echo requests sent between hosts A and B are observed arriving at host M, but no echo replies are returned. Since IP forwarding on M is disabled, the packets are not forwarded to the intended destination, causing communication between A and B to fail.
+Wireshark captures show repeated spoofed ARP replies advertising both 10.9.0.5 and 10.9.0.6 as being mapped to M’s MAC address, confirming successful ARP cache poisoning. Subsequently, ICMP echo requests sent between hosts A and B are observed arriving at host M, but no echo replies are returned. Since IP forwarding on M is disabled, the packets are not forwarded to the intended destination, causing communication between A and B to fail.
 
 ![a nad b fail ping](images/image-30.png)
 
@@ -333,7 +333,7 @@ Wireshark captures on host M show repeated spoofed ARP replies advertising both 
 ### Step 3 (Turn on IP forwarding)
 ><cite>Now we turn on the IP forwarding on Host M, so it will forward the packets between A and B.</cite>
 
-we can do so by running the following command on M:
+This can be done by running the following command on M:
 
 ```sh
 sysctl net.ipv4.ip_forward=1
@@ -341,18 +341,18 @@ sysctl net.ipv4.ip_forward=1
 
 ![turn on ip forwarding](images/image-31.png)
 
-We now repeat the testing fro test 2 and ping A and B between eachother, while observing traffic on wireshark.
+We now repeat the testing from ```step 2``` and ping A and B between eachother, while observing traffic on Wireshark.
 
 
 ![wireshark 2](images/image-32.png)
 
-When IP forwarding was enabled on host M, Wireshark captures show that ICMP echo requests sent between hosts A and B were successfully forwarded through M. The decrease in TTL values confirms that packets traversed M as an intermediate router.
+THis time, Wireshark captures show that ICMP echo requests sent between hosts A and B were successfully forwarded through M. The decrease in TTL values confirms that packets traversed M as an intermediate router.
 
 Note that some ICMP echo requests appear as “no response found” because the replies are observed on a different interface within the same capture (capturing was done on "any" interface).
 
 ![ping works](images/image-33.png)
 
- The presence of ICMP Redirect packets originating from M (10.9.0.105) confirms that IP forwarding is enabled on the attacking machine; the OS is just attempting to optimize the network path by informing the victims that they are on the same subnet and should communicate directly, unaware that the malicious routing is intentional.
+The presence of ICMP Redirect packets originating from M (10.9.0.105) confirms that IP forwarding is enabled on the attacking machine; the OS is just attempting to optimize the network path by informing the victims that they are on the same subnet and should communicate directly, unaware that the malicious routing is intentional.
 
 
 
@@ -360,7 +360,7 @@ Note that some ICMP echo requests appear as “no response found” because the 
 &nbsp;
 ### Step 4 (Launch the MITM attack)
 
-The first thing we need to do is we need to create a telnet connection between A and B. To do so we do the following:
+The first thing we need to do is we need to create a Telnet connection between A and B. To do so we do the following: ```telnet 10.9.0.6```
 
 ![Telnet A connecting to B](images/image-34.png)
 
@@ -368,18 +368,19 @@ Now, we are instructed to turn off IP forwarding on M using the previously menti
 
 ![disable ipforwarding](images/image-35.png)
 
-When typing characters in Host A’s Telnet window, no characters were displayed on the screen. This behavior occurs because Telnet relies on a round‑trip communication model: each keystroke is sent as a TCP packet from Host A to Host B, and the character is only displayed after Host B echoes it back to the client. Due to the ARP cache poisoning attack, all traffic between Hosts A and B is redirected through Host M. With IP forwarding disabled, Host M receives the packets from Host A but does not forward them to Host B, preventing the echo response from returning. As a result, the Telnet client on Host A displays no output, confirming that Host M has successfully positioned itself as a man in the middle and has full control over the communication channel.
+When typing characters in Host A’s Telnet window, no characters were displayed on the screen. This behavior occurs because Telnet relies on a round trip communication model: each keystroke is sent as a TCP packet from Host A to Host B, and the character is only displayed after Host B echoes it back to the client. 
+Due to the ARP cache poisoning attack, all traffic between Hosts A and B is redirected through Host M. With IP forwarding disabled, Host M receives the packets from Host A but does not forward them to Host B, preventing the echo response from returning. As a result, the Telnet client on Host A displays no output, confirming that Host M has successfully positioned itself as a man in the middle and has full control over the communication channel.
 
 
 Now we can proceed by crating the sniffAndSpoof.py program, starting from the skeleton provided in the [provided instructions](https://seedsecuritylabs.org/Labs_20.04/Files/ARP_Attack/ARP_Attack.pdf).
 
 
-To implement the man in the middle Telnet manipulation attack, the provided sniff‑and‑spoof program was modified to selectively intercept and alter TCP packets exchanged between Host A and Host B. The packet filter was restricted to TCP traffic on port 23 to capture only Telnet packets and to exclude packets generated by Host M itself (```not ether src MAC_M; not ip src IP_M```), preventing packet duplication and performance degradation. 
-For packets sent from Host A to Host B, a new IP/TCP packet was reconstructed based on the captured packet, with the original TCP payload removed and replaced by a forged payload consisting entirely of the character ‘Z’. The IP and TCP checksums were deleted so that Scapy could automatically recompute valid values for the modified packet. Packets sent from Host B to Host A were forwarded without modification to preserve normal Telnet responses. This design ensures that every keystroke typed by the user on Host A is altered during transit, causing the Telnet client to display only ‘Z’ characters, thereby demonstrating a successful application‑layer man in the middle attack.
+To implement the adversary in the middle Telnet attack, the provided sniff‑and‑spoof program was modified to selectively intercept and alter TCP packets exchanged between Host A and Host B. The packet filter was restricted to TCP traffic on port 23 to capture only Telnet packets and to exclude packets generated by Host M itself (```not ether src MAC_M; not ip src IP_M```), preventing packet duplication and performance degradation. 
+
+For packets sent from Host A to Host B, a new IP/TCP packet was reconstructed based on the captured packet, with the original TCP payload removed and replaced by a forged payload consisting of the character ```‘Z’```. The IP and TCP checksums were deleted so that Scapy could automatically recompute valid values for the modified packet. Packets sent from Host B to Host A were forwarded without modification to preserve normal Telnet responses. This design ensures that every keystroke typed by the user on Host A is altered during transit, causing the Telnet client to display only ‘Z’ characters, demonstrating a successful application layer adversary in the middle attack.
 
 
 The modified code:
-
 ```py
 #!/usr/bin/env python3
 from scapy.all import *
@@ -433,19 +434,21 @@ sniff(iface="eth0", filter=f_ilter, prn=spoof_pkt)
 
 ```
 
-We can now create a new python program in the volumes folder:
+We can now create a new python  script in the ```volumes``` folder:
 
 ![SniffAndSpoof](images/image-36.png)
 
-We can now execute the program on M, While simultanously MITMabTask2.py is running. (Sends arp replies every 5s).
+We can now execute the program on M, while simultanously MITMabTask2.py is running. (Sends arp replies every 5s).
 
-During initial testing, the Telnet client continued to display the original characters typed by the user, indicating that the spoofed packets were not taking effect. 
+><cite>During initial testing, the Telnet client continued to display the original characters typed by the user, indicating that the spoofed packets were not taking effect. 
 
-After some troubleshooting it was found that this occurred because IP forwarding on Host M was still enabled, allowing the kernel to forward the original TCP packets from Host A to Host B unchanged. As a result, both the original and spoofed packets reached Host B, and the unmodified packet was processed first. 
+After some troubleshooting it was found that this occurred because IP forwarding on Host M was still enabled, allowing the kernel to forward the original TCP packets from Host A to Host B unchanged. As a result, both the original and spoofed packets reached Host B, and the unmodified packet was processed first. </cite>
 
-After disabling IP forwarding on Host M, the original packets were no longer forwarded, and only the spoofed packets generated by the SniffAndSpoof program reached Host B. Consequently, every character typed in the Telnet client was replaced with the character ‘Z’, confirming successful application‑layer manipulation by the man in the middle attacker.
+After disabling IP forwarding on Host M, the original packets were no longer forwarded, and only the spoofed packets generated by the SniffAndSpoof program reached Host B. Consequently, every character typed in the Telnet client was replaced with the character ‘Z’, confirming successful application‑layer manipulation by the adversary in the middle attacker.
 
 ![final results](images/image-37.png)
+
+&nbsp;
 
 &nbsp;
 &nbsp;
@@ -453,7 +456,7 @@ After disabling IP forwarding on Host M, the original packets were no longer for
 
 This should be simmilar to the previous TASK. Telnet was an interactive protocol in which each keystroke typically generates an individual TCP packet, and characters are displayed only after being echoed back by the server. 
 
-In contrast, Netcat buffers user input and transmits an entire line of text in a single TCP packet once the Enter key is pressed. As a result, Telnet attacks can modify individual characters, while Netcat attacks must carefully modify substrings within the payload while preserving payload length to maintain correct TCP sequence numbers.
+In contrast, Netcat buffers user input and transmits an entire line of text in a single TCP packet once the ```Enter``` key is pressed. As a result, Telnet attacks can modify individual characters, while Netcat attacks must carefully modify substrings within the payload while preserving payload length to maintain correct TCP sequence numbers.
 
 As required we first set ```─sysctl net.ipv4.ip_forward=1``` on M to enable communication between A and B. 
 
@@ -539,19 +542,20 @@ Experimental results showed that messages typed on Host A appeared altered on Ho
 
 &nbsp;
 ## Conclusion
-In this lab, we demonstrated the feasibility and impact of ARP cache poisoning attacks in a local network.  By exploiting the lack of authentication in the ARP protocol, Host M successfully positioned itself as a man in the middle between Hosts A and B. Through controlled experiments, we showed how ARP replies and gratuitous ARP messages can be used to poison ARP caches under different conditions. 
+In this lab, we demonstrated the feasibility and impact of ARP cache poisoning attacks in a local network.  By exploiting the lack of authentication in the ARP protocol, Host M successfully positioned itself as an adversary in the middle between Hosts A and B. Through controlled experiments, we showed how ARP replies and gratuitous ARP messages can be used to poison ARP caches under different conditions. 
 
 We further illustrated the consequences of such attacks by disrupting communication when IP forwarding was disabled and by transparently intercepting and modifying application layer data when forwarding was selectively controlled. 
-Finally, man in the middle attacks were implemented on both Telnet and Netcat connections, demonstrating how differences in application behavior affect packet manipulation strategies. 
+Finally, adversary in the middle attacks were implemented on both Telnet and Netcat connections, demonstrating how differences in application behavior affect packet manipulation strategies. 
 
 
-Overall, this lab highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
+Overall, this lab activity highlighted the security weaknesses of ARP and underscored the importance of deploying protective mechanisms such as secure ARP, traffic encryption, and network monitoring to defend against these types of attacks.
 
 
 &nbsp;
 &nbsp;
 ## Disclaimer ⚠️
 The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
+
 
 
 
