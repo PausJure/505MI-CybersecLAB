@@ -217,7 +217,7 @@ ARP cache in A, before and after:
 ![arp cache A after](images/image-20.png)
 
 
-><cite>Clearing A's ARP cache to try to send the packet again but with A's cache empty as per requirement:</cite>
+><cite>Clearing A's ARP cache to try to send the packet again but with A's cache empty, as per requirement:</cite>
 
 ![clearing A cache](images/image-21.png)
 
@@ -231,6 +231,7 @@ As can be seen host A does not create new ARP cache entries in response to gratu
 
 
 
+&nbsp;
 
 &nbsp;
 &nbsp;
@@ -238,11 +239,12 @@ As can be seen host A does not create new ARP cache entries in response to gratu
 
 To complete the task we first need to setup host M to continuously send spoofed ARP replies to both A and B, poisoning their ARP caches so that each host associates the other’s IP address with M’s MAC address, enabling a man in the middle attack. 
 
-We need to do so continously because ARP cache entries expire and legitimate traffic may owerwrite our entries.
+We need to do so continously because ARP cache entries expire and legitimate traffic may overwrite our entries.
 
 &nbsp;
 ### Step 1 (Launch the ARP cache poisoning attack)
-To do so we will write a python script that complies with the requirements. Note that we will use ARP replies to poison our victims, basically assuming an entry already exists which is reasonable. ARP replies are preferred over ARP requests for cache poisoning because they are more consistently accepted as updates to existing ARP entries, whereas unsolicited ARP requests are often ignored or restricted by modern operating systems.
+To do so we will write a python script that complies with the requirements. Note that we will use ARP replies to poison our victims, basically assuming an entry already exists which is reasonable.
+ARP replies are preferred over ARP requests for cache poisoning because they are more consistently accepted as updates to existing ARP entries, whereas unsolicited ARP requests are often ignored or restricted by modern operating systems.
 
 So to begin we ping A from B and B from A to fill the ARP caches.
 
@@ -550,6 +552,7 @@ Overall, this lab highlighted the security weaknesses of ARP and underscored the
 &nbsp;
 ## Disclaimer ⚠️
 The code used in this project was largely written with the assistance of a large language model, due to my limited proficiency in programming languages. However, I am able to read, understand, and critically evaluate the implemented code. Thus, all design choices, results, and any potential errors or inaccuracies present in this project are solely my responsibility.
+
 
 
 
