@@ -50,7 +50,7 @@ This modification successfully triggered a JavaScript alert, confirming the pres
 
 ## Discussing the Differences
 
-### Looking "Under the hood"
+### Looking "under the hood"
 Although the two challenges appear very similar from a user’s perspective, they differ significantly in their underlying implementation. For this reason, it was necessary to examine the application “under the hood” by analysing the client-side source code.
 
 To access the source code, Chrome Developer Tools were used, navigating to the Sources tab. Within this section, several JavaScript files were identified, most notably main.js. Inspection of this file quickly revealed the relevant logic responsible for processing and handling user input, providing insight into how the application renders and executes the supplied data.
@@ -87,6 +87,7 @@ The primary distinction between these two cases lies in the origin of the payloa
 - Course slides (04_XSS.pdf)
 - https://angular.dev/api/platform-browser/DomSanitizer
 - https://angular.dev/
+
 
 
 
